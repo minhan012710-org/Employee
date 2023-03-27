@@ -15,14 +15,14 @@ app = FastAPI()
 
 # Class 
 class Member(BaseModel):
-    name: str
+    email: str
     image: str
 
 class Detection(BaseModel):
     image: str
 
 class Elimination(BaseModel):
-    name: str
+    email: str
 
 # Function encode to base64 and decode from base64
 def stringToRGB(base64_string):
@@ -43,21 +43,23 @@ def RGB2String(image):
 async def add_new_member(item: Member):
     trainer = Trainer()
     img = stringToRGB(item.image)
-    trainer.add_member(image = img, name = item.code)
+    result = trainer.add_member(image = img, email = item.code)
+    if result is None:
+        return "Add member failed"
     return "Add member successfully!"
 
 @app.delete("/delete")
 async def delete_member(item: Elimination):
-    return item.name
+    return item.email
 
 @app.post("/detection")
 async def detection_face(item: Detection):
     #image = base64.b64encode(item.image)
     image = stringToRGB(item.image)
     result = face_recogny.recogny_face(image)
-    frame, bbox, name, current_time = result
+    frame, bbox, email, current_time = result
     frame_b64 = RGB2String(frame)
-    return  name, current_time
+    return  email, current_time
 
 
 if __name__ == "__main__":
